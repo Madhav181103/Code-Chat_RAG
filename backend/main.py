@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from config import settings
 
-from routes import repo_routes
+from routes import repo_routes, chat_routes, file_routes
 
 app = FastAPI(title="CodeChat API")
 
@@ -20,8 +20,10 @@ app.add_middleware(
 async def health_check():
     return {"message": "CodeChat API is running"}
 
-# Register repository routes
+# Register repository, chat and file routes
 app.include_router(repo_routes.router)
+app.include_router(chat_routes.router)
+app.include_router(file_routes.router)
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=settings.PORT, reload=True)
