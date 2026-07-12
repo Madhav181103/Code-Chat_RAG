@@ -16,7 +16,11 @@ def build_vectorstore(repo_name: str, chunks: list[dict]) -> Chroma:
     # This prevents duplicate data and ensures that re-ingesting a repository creates a 
     # clean, fresh database index rather than appending chunks to the old database.
     if os.path.exists(persist_directory):
-        shutil.rmtree(persist_directory)
+        def remove_readonly(func, path, exc):
+            import stat
+            os.chmod(path, stat.S_IWRITE)
+            func(path)
+        shutil.rmtree(persist_directory, onexc=remove_readonly)
         
     # Ensure the parent persist directory exists
     os.makedirs(settings.CHROMA_PERSIST_DIR, exist_ok=True)

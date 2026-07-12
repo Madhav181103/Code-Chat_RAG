@@ -30,7 +30,11 @@ def clone_repo(repo_url: str) -> str:
     # This ensures that calling clone_repo multiple times for the same repo
     # will overwrite the existing clone rather than failing with a destination-already-exists error.
     if os.path.exists(target_path):
-        shutil.rmtree(target_path)
+        def remove_readonly(func, path, exc):
+            import stat
+            os.chmod(path, stat.S_IWRITE)
+            func(path)
+        shutil.rmtree(target_path, onexc=remove_readonly)
 
     try:
         # Perform a shallow clone (depth=1). We only need the current file contents
