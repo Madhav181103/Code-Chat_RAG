@@ -1,3 +1,4 @@
+import re
 from fastapi import APIRouter, HTTPException
 from models.schemas import IngestRequest, IngestResponse
 from services.git_service import clone_repo, get_repo_name
@@ -11,6 +12,21 @@ router = APIRouter(prefix="/api/repo", tags=["Repository Ingestion"])
 @router.post("/ingest", response_model=IngestResponse)
 async def ingest_repository(request: IngestRequest):
     repo_url = request.repo_url.strip()
+    if not repo_url:
+        raise HTTPException(status_code=400, detail="Repo URL is required")
+        
+    # Validate URL structure using regex to catch syntax issues instantly
+    # Why we validate the URL shape here:
+    # Verifying format beforehand lets us fail fast with a precise, actionable instruction.
+    # It prevents initiating a slow network subprocess (git clone) for obviously broken inputs,
+    # which would eventually fail with a confusing generic git command error.
+    pattern = r'^https://github\.com/[\w.-]+/[\w.-]+(\.git)?/?$'
+    if not re.match(pattern, repo_url):
+        raise HTTPException(
+            status_code=400,
+            detail="Please provide a valid public GitHub repo URL, e.g. https://github.com/user/repo"
+        )
+        
     print(f"\n[Ingest] Starting ingestion process for repository URL: {repo_url}")
     
     # 1. Derive the repository folder name

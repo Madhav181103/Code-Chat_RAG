@@ -76,7 +76,16 @@ const ChatPanel = () => {
       </div>
 
       <div className="chat-messages-viewport">
-        {messages.length === 0 ? (
+        {!repoName ? (
+          <div className="chat-welcome-placeholder">
+            <span className="welcome-icon">🔒</span>
+            <h3>Load a repo above to start chatting</h3>
+            <p>
+              Please enter a public repository URL in the search bar above to fetch, index, 
+              and prepare the codebase for questioning.
+            </p>
+          </div>
+        ) : messages.length === 0 ? (
           <div className="chat-welcome-placeholder">
             <span className="welcome-icon">⚡</span>
             <h3>Ask questions about the repository</h3>
